@@ -5,10 +5,10 @@ i = 1
 
 while(i):
     mydb_local = mysql.connector.connect( #data-data pada variabel ini dikoneksikan menggunakan sintaks mysql.connector.connect()
-    host="localhost", #merupakan nama host yang digunakan
-    user="root", #merupakan nama user yang digunakan
-    passwd="", #diisi apabila terdapat password didalamnya
-    database="db_modul1", #merupakan nama database yang digunakan
+    host="sql6.freemysqlhosting.net", #merupakan nama host yang digunakan
+    user="sql6484575", #merupakan nama user yang digunakan
+    passwd="wFb38tlJyG", #diisi apabila terdapat password didalamnya
+    database="sql6484575", #merupakan nama database yang digunakan
     )
 
     mydb_host = mysql.connector.connect(
@@ -33,9 +33,15 @@ while(i):
 
         sql = "insert into tb_transaksi(pegawai, customer, barang, harga, status_transaksi, tgl_transaksi, updated_at, deleted_at) values (%s, %s, %s, %s, %s, %s, %s, %s)" #variabel yang menampung sintaks sql yang cukup panjang    
         val = (pegawai, customer, barang, harga, "pending", timestamp, None, None) #variabel akan melempar value agar masuk ke dalam sintaks diatasnya, karena banyak jadi saya pisahkan
-
         mycursor.execute(sql, val) #seperti biasa mycursor.execute() digunakan untuk mengeksekusi sintaks dari bahasa sql yang dituliskan di python
         mydb_local.commit() #commit() digunakan ketika kita memodifikasi data tabel baik dalam create, update, delete
+        
+        mycursor.execute("SELECT MAX(id) FROM tb_transaksi")
+        for i in mycursor.fetchall():
+            idx = i[0]
+        sink = "INSERT INTO tb_sync (id_tabel, aksi) VALUES ("+str(idx)+", 'insert') " 
+        mycursor.execute(sink)
+        mydb_local.commit()
         print("Berhasil menambah transaksi pada db local")
 
 
@@ -46,6 +52,10 @@ while(i):
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S') #digunakan untuk mengambil waktu saat ini ke dalam bentuk string        
     sql = "update tb_transaksi set updated_at ='"+timestamp+"', status_transaksi ='"+update+"' where id="+idx+" " #digunakan untuk mengupdate data pada tabel transaksi sesuai parameter yang diberikan
     mycursor.execute(sql)
+    mydb_local.commit()
+
+    sink = "INSERT INTO tb_sync (id_tabel, aksi) VALUES ("+idx+", 'update') " 
+    mycursor.execute(sink)
     mydb_local.commit()
     print("Berhasil mengupdate transaksi pada db local")
 
