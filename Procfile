@@ -1,0 +1,1 @@
+worker: python klp12.py
