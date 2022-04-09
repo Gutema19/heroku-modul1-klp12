@@ -21,44 +21,6 @@ while(i):
     mycursor = mydb_local.cursor() #digunakan untuk pengolahan data CRUD yang diambil dari database
     mycursor_host = mydb_host.cursor() #digunakan untuk pengolahan data CRUD yang diambil dari database
 
-# ---------------------- INSERT DATA ----------------------
-    for i in range(1,3):
-        print("====================== INSERT ======================")
-        print("Input data transaksi. Isilah data-data berikut") #seperti biasa menggunakan pertanyaan untuk pengisian data.
-        pegawai = input("pegawai : ") #variabel akan mengampung data (value) yang nantinya akan diinput ke database
-        customer = input("customer : ")
-        barang = input("barang : ")
-        harga = int(input("harga : "))
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-        sql = "insert into tb_transaksi(pegawai, customer, barang, harga, status_transaksi, tgl_transaksi, updated_at, deleted_at) values (%s, %s, %s, %s, %s, %s, %s, %s)" #variabel yang menampung sintaks sql yang cukup panjang    
-        val = (pegawai, customer, barang, harga, "pending", timestamp, None, None) #variabel akan melempar value agar masuk ke dalam sintaks diatasnya, karena banyak jadi saya pisahkan
-        mycursor.execute(sql, val) #seperti biasa mycursor.execute() digunakan untuk mengeksekusi sintaks dari bahasa sql yang dituliskan di python
-        mydb_local.commit() #commit() digunakan ketika kita memodifikasi data tabel baik dalam create, update, delete
-        
-        mycursor.execute("SELECT MAX(id) FROM tb_transaksi")
-        for i in mycursor.fetchall():
-            idx = i[0]
-        sink = "INSERT INTO tb_sync (id_tabel, aksi) VALUES ("+str(idx)+", 'insert') " 
-        mycursor.execute(sink)
-        mydb_local.commit()
-        print("Berhasil menambah transaksi pada db local")
-
-
-# ---------------------- UPDATE DATA ----------------------
-    print("====================== UPDATE LOCAL ======================")
-    idx = input("Silahkan input id data yang ingin diubah: ")
-    update = input("Ubah status_transaksi menjadi (berhasil/gagal): ")
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S') #digunakan untuk mengambil waktu saat ini ke dalam bentuk string        
-    sql = "update tb_transaksi set updated_at ='"+timestamp+"', status_transaksi ='"+update+"' where id="+idx+" " #digunakan untuk mengupdate data pada tabel transaksi sesuai parameter yang diberikan
-    mycursor.execute(sql)
-    mydb_local.commit()
-
-    sink = "INSERT INTO tb_sync (id_tabel, aksi) VALUES ("+idx+", 'update') " 
-    mycursor.execute(sink)
-    mydb_local.commit()
-    print("Berhasil mengupdate transaksi pada db local")
-
 
     print("====================== SYNC LOCAL ======================")
     sync = []
@@ -132,20 +94,6 @@ while(i):
             print("Data " +str(idx)+ " telah tersinkronisasi")
 
 
-    print("====================== UPDATE HOST ======================")
-    idx = input("Silahkan input id data yang ingin diubah: ")
-    update = input("Ubah status_transaksi menjadi (berhasil/gagal): ")
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S') #digunakan untuk mengambil waktu saat ini ke dalam bentuk string        
-    sql = "update tb_transaksi set updated_at ='"+timestamp+"', status_transaksi ='"+update+"' where id="+idx+" " #digunakan untuk mengupdate data pada tabel transaksi sesuai parameter yang diberikan
-    mycursor_host.execute(sql)
-    mydb_host.commit()
-
-    sink = "INSERT INTO tb_sync (id_tabel, aksi) VALUES ("+idx+", 'update') " 
-    mycursor_host.execute(sink)
-    mydb_host.commit()
-    print("Berhasil mengupdate transaksi pada db host")
-
-
     print("====================== SYNC HOST ======================")
     sync = []
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')    
@@ -189,28 +137,6 @@ while(i):
 
         else:
             print("Data " +str(idx)+ " telah tersinkronisasi")
-
-
-# ---------------------- DELETE DATA ----------------------
-    print("====================== DELETE ======================")
-    idx = input("Pilih id dari data yang ingin dihapus : ") #digunakan sebagai id sesuai untuk data yang akan dihapus
-    tanya = input("Yakin menghapus data (Y/N) ? ") #digunakan untuk memastikan apakah benar-benar ingin menghapus data
-    if tanya == "Y":
-        sink = "INSERT INTO tb_sync (id_tabel, aksi) VALUES ("+idx+", 'delete') " 
-        mycursor.execute(sink)
-        mydb_local.commit()
-
-        sql = "delete from tb_transaksi where id="+idx+" " #apabila telah yakin maka sintaks ini akan menghapus data yang berseuaian dengan apa yang diinputkan sebelumnya
-        mycursor.execute(sql)
-        mydb_local.commit()
-        print("Berhasil menghapus transaksi pada db local")
-
-
-    elif tanya == "N": #digunakan untuk membatalkan penghapusan data
-        print("Penghapusan dicancel/batal")
-    else: #dibuat apabila terdapat salah penginputan
-        print("Pilihan tidak sesuai! Silahkan coba lagi")
-    
 
 
     print("====================== READ ======================")
