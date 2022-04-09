@@ -171,4 +171,4 @@ while(i):
         print(str(idx)+" "+pegawai+" "+customer+" "+barang+" "+str(harga)+" "+str(status_transaksi)+" "+str(tgl_transaksi)+" "+str(updated_at)+" "+str(deleted_at))
         #data mentah (value) kemudian di print sehingga tampil
 
-    i=0
+    #i=0
